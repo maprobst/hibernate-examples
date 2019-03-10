@@ -1,8 +1,10 @@
 package com.probstl.entity;
 
-import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
+import org.hibernate.Session;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -44,7 +46,54 @@ public class BidirectionalOneToMany {
 	
 	@Test
 	public void createBuildingAndRoom() {
+		Building building = new Building("Schuppen");
+		extension.em().persist(building);
 		
+		Room room = new Room("Kitchen");
+		
+		extension.em().persist(room);
+		
+		extension.em().clear();
+		
+		Session s = extension.em().unwrap(Session.class);
+		Room rloaded = s.bySimpleNaturalId(Room.class).load("Kitchen");
+		Assertions.assertNotNull(rloaded);
+		
+		Building loadNix = s.bySimpleNaturalId(Building.class).load("Sch");
+		Assertions.assertNull(loadNix);
+		
+		Building loadBuilding = s.bySimpleNaturalId(Building.class).load("Schuppen");
+		Assertions.assertNotNull(loadBuilding);
+		Assertions.assertEquals(0, loadBuilding.getRooms().size());
+		
+	}
+	
+	
+	@Test
+	public void createBuildingAddToList() {
+		Building building = new Building("Bude");
+		Room room = new Room("Living");
+		building.getRooms().add(room);
+		extension.em().persist(room);
+		extension.em().persist(building);
+				
+		extension.getTx().commit();
+		extension.em().close();
+		
+		EntityManager em = extension.getEmf().createEntityManager();
+		em.getTransaction().begin();
+		
+		Session s = em.unwrap(Session.class);
+
+		
+		Building loadBuilding = s.bySimpleNaturalId(Building.class).load("Bude");
+		Assertions.assertNotNull(loadBuilding);
+	//	Assertions.assertEquals(0, loadBuilding.getRooms().size());
+		
+		Room rloaded = s.bySimpleNaturalId(Room.class).load("Living");
+		//Assertions.assertNotNull(rloaded);
+		em.getTransaction().commit();
+		em.close();
 	}
 
 

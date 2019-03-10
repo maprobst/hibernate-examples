@@ -18,7 +18,7 @@ public class PersistenceExtension implements BeforeEachCallback, AfterEachCallba
 	private EntityManager em;
 	private EntityTransaction tx;
 	private EntityManagerFactory emf;
-	
+
 	public static PersistenceExtension initPersistence(String persistenceUnit) {
 		return new PersistenceExtension(persistenceUnit);
 	}
@@ -48,6 +48,14 @@ public class PersistenceExtension implements BeforeEachCallback, AfterEachCallba
 	
 	public void closeUp() {
 		emf.close();
+	}
+	
+	public EntityManagerFactory getEmf() {
+		return emf;
+	}
+	
+	public EntityTransaction getTx() {
+		return tx;
 	}
 
 }
